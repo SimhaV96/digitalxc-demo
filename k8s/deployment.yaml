@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-world-nginx
+  namespace: default
+  labels:
+    app: hello-world-nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-world-nginx
+  template:
+    metadata:
+      labels:
+        app: hello-world-nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:stable-alpine
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: html-volume
+              mountPath: /usr/share/nginx/html
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+      volumes:
+        - name: html-volume
+          configMap:
+            name: hello-world-html
+

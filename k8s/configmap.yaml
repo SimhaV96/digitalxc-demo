@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hello-world-html
+  namespace: default
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Hello World</title>
+      </head>
+      <body style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;">
+        <h1>Hello World</h1>
+      </body>
+    </html>
+

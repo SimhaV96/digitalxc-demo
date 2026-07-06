@@ -1,0 +1,78 @@
+---
+- name: Install k3s single-node cluster on Ubuntu
+  hosts: k3s_node
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Install required dependencies
+      apt:
+        name:
+          - curl
+          - apt-transport-https
+          - ca-certificates
+          - gnupg
+          - lsb-release
+        state: present
+
+    - name: Check if k3s is already installed
+      stat:
+        path: /usr/local/bin/k3s
+      register: k3s_binary
+
+    - name: Download and install k3s (latest stable)
+      shell: |
+        curl -sfL https://get.k3s.io | sh -
+      when: not k3s_binary.stat.exists
+      environment:
+        INSTALL_K3S_CHANNEL: stable
+
+    - name: Wait for k3s node-token to be created
+      wait_for:
+        path: /var/lib/rancher/k3s/server/node-token
+        timeout: 120
+
+    - name: Wait for k3s to be ready (node Ready status)
+      shell: k3s kubectl get nodes | grep -w Ready
+      register: node_status
+      until: node_status.rc == 0
+      retries: 15
+      delay: 10
+      changed_when: false
+
+    - name: Ensure kubeconfig is readable by ubuntu user
+      file:
+        path: /etc/rancher/k3s/k3s.yaml
+        mode: '0644'
+
+    - name: Create .kube directory if missing
+      file:
+        path: /home/ubuntu/.kube
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0700'
+
+    - name: Copy kubeconfig to ubuntu home directory for convenience
+      copy:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: /home/ubuntu/.kube/config
+        remote_src: true
+        owner: ubuntu
+        group: ubuntu
+        mode: '0600'
+
+    - name: Display k3s version
+      command: k3s --version
+      register: k3s_version
+      changed_when: false
+
+    - name: Show installed version
+      debug:
+        var: k3s_version.stdout_lines
+
