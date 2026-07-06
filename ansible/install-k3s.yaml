@@ -27,7 +27,7 @@
 
     - name: Download and install k3s (latest stable)
       shell: |
-        curl -sfL https://get.k3s.io | sh -
+        curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable traefik" sh -
       when: not k3s_binary.stat.exists
       environment:
         INSTALL_K3S_CHANNEL: stable
