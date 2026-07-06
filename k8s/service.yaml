@@ -4,11 +4,9 @@ metadata:
   name: hello-world-nginx-service
   namespace: default
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     app: hello-world-nginx
   ports:
     - port: 80
       targetPort: 80
-      nodePort: 30080
-

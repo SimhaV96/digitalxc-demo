@@ -24,7 +24,7 @@ jobs:
           kubectl apply -f k8s/service.yaml
 
       - name: Wait for rollout to complete
-        run: kubectl rollout status deployment/hello-world-nginx --timeout=90s
+        run: kubectl rollout restart deployment/hello-world-nginx && kubectl rollout status deployment/hello-world-nginx --timeout=90s
 
       - name: Show deployment status
         run: |
